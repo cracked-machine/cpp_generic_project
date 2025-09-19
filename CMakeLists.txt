@@ -27,3 +27,20 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 add_subdirectory( ${CMAKE_SOURCE_DIR}/src )
 
+# Copy MinGW runtime DLLs for Windows builds
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows" AND BUILD_ARCH STREQUAL "x86_64-w64-mingw32")
+    # Ensure bin directory exists
+    file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+    
+    # Copy runtime DLLs
+    if(EXISTS /usr/lib/gcc/x86_64-w64-mingw32/14-win32/libstdc++-6.dll)
+        file(COPY /usr/lib/gcc/x86_64-w64-mingw32/14-win32/libstdc++-6.dll
+             DESTINATION ${CMAKE_BINARY_DIR}/bin/)
+    endif()
+    
+    if(EXISTS /usr/lib/gcc/x86_64-w64-mingw32/14-win32/libgcc_s_seh-1.dll)
+        file(COPY /usr/lib/gcc/x86_64-w64-mingw32/14-win32/libgcc_s_seh-1.dll
+             DESTINATION ${CMAKE_BINARY_DIR}/bin/)
+    endif()
+endif()
+
