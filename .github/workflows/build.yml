@@ -1,0 +1,65 @@
+name: Build Matrix
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  build:
+    name: Build ${{ matrix.config }} for ${{ matrix.arch }}
+    runs-on: ubuntu-latest
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        config: [Debug, Release, RelWithDebInfo, MinSizeRel]
+        arch: [x86_64-linux-gnu, x86_64-w64-mingw32]
+
+    container:
+      image: debian:trixie
+      options: --user root
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: |
+        export DEBIAN_FRONTEND=noninteractive
+        apt update -y
+        apt install -y \
+          clangd \
+          clang-format \
+          sudo \
+          locales \
+          doxygen \
+          git \
+          build-essential \
+          make \
+          pkg-config \
+          cmake \
+          ninja-build \
+          yq \
+          jq \
+          gcc-mingw-w64-x86-64 \
+          g++-mingw-w64-x86-64
+
+    - name: Setup locale
+      run: |
+        locale-gen en_GB.UTF-8
+        update-locale
+
+    - name: Make build script executable
+      run: chmod +x scripts/build.sh
+
+    - name: Build ${{ matrix.config }} for ${{ matrix.arch }}
+      run: ./scripts/build.sh ${{ matrix.config }} ${{ matrix.arch }}
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-${{ matrix.config }}-${{ matrix.arch }}
+        path: build-${{ matrix.arch }}/bin/
+        retention-days: 7
