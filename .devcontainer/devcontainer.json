@@ -2,7 +2,15 @@
 // README at: https://github.com/devcontainers/templates/tree/main/src/ubuntu
 {
     "name": "C++ General",
-    "build": { "dockerfile": "Dockerfile" },
+    "build": 
+    { 
+        "dockerfile": "Dockerfile",
+        // pass current user id into dockerfile
+        "args": {
+            "USER_UID": "${localEnv:USER_UID:1000}",
+            "USER_GID": "${localEnv:USER_GID:1000}"
+        }
+    },
     "customizations": {
         "vscode": {
             "extensions": [
